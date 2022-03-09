@@ -16,9 +16,12 @@ class GoogleServiceHandler:
         Read credentials file and save them in memory.
 
         Args:
+            - service(str): service name. Read Google API doc for reference.
+            - version(str): service version. Read Google API doc for reference.
             - credential_file_path(str): relative path of the credential file.
 
-        Returns(HandlerObject | None)
+        Returns(tupple | None):
+            (credentials, service)
 
         """
         logger.log_info("Initializing {} Handler...".format(service))
@@ -26,9 +29,9 @@ class GoogleServiceHandler:
         if not os.path.exists(path):
             logger.log_error("{} configuration file does not exists"
                              .format(path))
-            return None
+            return None, None
 
-        self.credentials = Credentials.from_authorized_user_file(path)
-        self.service = build(service, version, credentials=self.credentials)
+        credentials = Credentials.from_authorized_user_file(path)
+        service = build(service, version, credentials=credentials)
         logger.log_info("{} Handler initialized".format(service))
-        return self
+        return credentials, service
