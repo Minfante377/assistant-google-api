@@ -35,8 +35,34 @@ class TestEmailHandler(unittest.TestCase):
         Send an email to the test email. Assert the result.
 
         """
-        result, error = self.handler.send_email(EmailUtils.TEST_EMAIL,
-                                                EmailUtils.TEST_EMAIL,
-                                                EmailUtils.TEST_BODY,
-                                                EmailUtils.TEST_SUBJECT)
+        result, error = self.handler.send_email(
+            EmailUtils.TEST_EMAIL,
+            EmailUtils.TEST_EMAIL,
+            EmailUtils.TEST_BODY,
+            EmailUtils.TEST_SUBJECT)
         assert result, "Failed to send email: {}".format(error)
+
+    def test_send_email_attachement(self):
+        """
+        Preconditions:
+            - EmailHandler object correctly instantiated.
+
+        Send an email with attachement to the test email. Assert the result.
+        The test files used are pdf and image type.
+
+        """
+        result, error = self.handler.send_email_attachement(
+            EmailUtils.TEST_EMAIL,
+            EmailUtils.TEST_EMAIL,
+            EmailUtils.TEST_BODY,
+            EmailUtils.TEST_SUBJECT,
+            EmailUtils.TEST_FILE_PDF)
+        assert result, "Failed to send email with pdf: {}".format(error)
+
+        result, error = self.handler.send_email_attachement(
+            EmailUtils.TEST_EMAIL,
+            EmailUtils.TEST_EMAIL,
+            EmailUtils.TEST_BODY,
+            EmailUtils.TEST_SUBJECT,
+            EmailUtils.TEST_FILE_IMAGE)
+        assert result, "Failed to send email with image: {}".format(error)
