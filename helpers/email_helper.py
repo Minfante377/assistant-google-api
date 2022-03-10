@@ -9,7 +9,7 @@ from email.mime.multipart import MIMEMultipart, MIMEBase
 from email.mime.text import MIMEText
 from googleapiclient import errors
 
-from helpers.service_helper import GoogleServiceHandler
+from helpers.service_helper import GoogleServiceHandler, get_auth
 from utils.logger import logger
 
 
@@ -36,6 +36,7 @@ class EmailHandler(GoogleServiceHandler):
         if not self.credentials:
             logger.log_error("Failed to initialize EmailHandler")
 
+    @get_auth
     def send_email(self, recipient, sender, body, subject):
         """
         Build and send an email.
@@ -70,6 +71,7 @@ class EmailHandler(GoogleServiceHandler):
             logger.log_error("Error sending message: {}".format(e))
             return False, str(e)
 
+    @get_auth
     def send_email_attachement(self, recipient, sender, body, subject,
                                attachement):
         """
