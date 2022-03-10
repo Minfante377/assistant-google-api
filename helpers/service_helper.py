@@ -42,10 +42,10 @@ def get_auth(f):
                 token.write(creds.to_json())
         return creds
 
-    def wrapper(*args):
+    def wrapper(*args, **kwargs):
         creds = _auth()
         args[0].credentials = creds
-        return f(*args)
+        return f(*args, **kwargs)
 
     return wrapper
 
