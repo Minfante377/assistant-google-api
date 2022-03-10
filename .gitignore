@@ -4,3 +4,4 @@
 *venv/
 *.txt
 *credentials.json
+*client_secret.json

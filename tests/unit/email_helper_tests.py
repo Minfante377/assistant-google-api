@@ -1,6 +1,6 @@
 import unittest
 
-from consts.auth import EmailAuth
+from consts.auth import Auth
 from consts.utils import EmailUtils
 from helpers.email_helper import EmailHandler
 from utils.logger import logger
@@ -17,7 +17,7 @@ class TestEmailHandler(unittest.TestCase):
         Instanciate the EmailHandler to be used on the following tests.
         """
         logger.log_info("Instanciating the EmailHandler")
-        cls.handler = EmailHandler(EmailAuth.CREDENTIALS_FILE)
+        cls.handler = EmailHandler(Auth.CREDENTIALS_FILE)
 
     def setUp(self):
         """
