@@ -112,13 +112,48 @@ class StorageHandler(GoogleServiceHandler):
             logger.log_error("Error creating file: {}".format(e))
             return False, str(e)
 
-    def _get_folder_id(self, folder_name):
+    def _get_file_id(self, file_name, parent_id=None):
+        """
+        Query the file id of a folder by file name.
+
+        Args:
+            - file_name(str): The name of the file we want to get the id
+                                from.
+            - parent_id(str): Parent folder ID.
+
+        Returns(tupple):
+            (True, [id]) or (False, err_msg)
+
+        """
+        query = "name='{}'".format(file_name) +\
+                " and mimeType='application/vnd.google-apps.file'" +\
+                " and trashed=false"
+        if parent_id:
+            query += " and {} in parents".format(parent_id)
+
+        fields = "nextPageToken, files(id)"
+        logger.log_info("Querying file {}".format(query))
+        try:
+            r = self.service.files().list(q=query,  fields=fields,
+                                          spaces='drive').execute()
+            items = r.get('files', [])
+            if not items:
+                logger.log_error("No file found")
+                return False, "No file found"
+            file_id = items[0]['id']
+            return True, [file_id]
+        except Exception as e:
+            logger.log_info("Error querying file: {}".format(e))
+            return False, str(e)
+
+    def _get_folder_id(self, folder_name, parent_id=None):
         """
         Query the folder id of a folder by folder name.
 
         Args:
             - folder_name(str): The name of the folder we want to get the id
                                 from.
+            - parent_id(str): Parent folder ID.
 
         Returns(tupple):
             (True, [id]) or (False, err_msg)
@@ -127,6 +162,9 @@ class StorageHandler(GoogleServiceHandler):
         query = "name='{}'".format(folder_name) +\
                 " and mimeType='application/vnd.google-apps.folder'" +\
                 " and trashed=false"
+        if parent_id:
+            query += " and {} in parents".format(parent_id)
+
         fields = "nextPageToken, files(id)"
         logger.log_info("Querying folder {}".format(query))
         try:
