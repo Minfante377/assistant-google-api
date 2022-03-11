@@ -38,3 +38,21 @@ class TestStorageHandler(unittest.TestCase):
         result, error =\
             self.handler.create_folder(StorageUtils.TEST_FOLDER_NAME)
         assert result, "Failed to create new folder: {}".format(error)
+
+    def test_create_file(self):
+        """
+        Preconditions:
+            - StorageHandler object correctly instantiated.
+
+        Create a new file. Assert the result.
+        Create a pdf and image file.
+
+        """
+
+        result, error =\
+            self.handler.create_file(StorageUtils.TEST_FILE_IMAGE)
+        assert result, "Failed to create new file: {}".format(error)
+
+        result, error =\
+            self.handler.create_file(StorageUtils.TEST_FILE_PDF)
+        assert result, "Failed to create new file: {}".format(error)

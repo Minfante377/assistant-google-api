@@ -1,4 +1,8 @@
+import mimetypes
+import os
+
 from googleapiclient import errors
+from googleapiclient.http import MediaFileUpload
 
 from helpers.service_helper import GoogleServiceHandler, get_auth
 from utils.logger import logger
@@ -61,6 +65,51 @@ class StorageHandler(GoogleServiceHandler):
             return True, None
         except errors.HttpError as e:
             logger.log_error("Error creating folder: {}".format(e))
+            return False, str(e)
+
+    @get_auth
+    def create_file(self, file_name, parent_name=None):
+        """
+        Creates a folder using Google Drive API.
+
+        Args:
+            - file_name(str): The name of the file to create.
+            - parent_name(list): Parent folder name.
+
+        Returns(Tupple):
+            (True, None) or (False, err_msg)
+
+        """
+        logger.log_info("Creating a new file:\nName:{}\nParent IDs:{}"
+                        .format(file_name, parent_name))
+
+        mime_type, err = mimetypes.guess_type(file_name)
+        if err:
+            logger.log_error("Error detecting file type: {}".format(err))
+            return False, err
+
+        logger.log_info("File type detected: {}".format(mime_type))
+        media = MediaFileUpload(file_name, mimetype=mime_type)
+
+        file_metadata = {
+            'name': os.path.basename(file_name),
+        }
+        if parent_name:
+            r, parent_id = self._get_folder_id(parent_name)
+            if r:
+                file_metadata['parents'] = parent_id
+            else:
+                return False, parent_id
+
+        try:
+            self.service.files().create(
+                body=file_metadata,
+                media_body=media).execute()
+            logger.log_info("File {} successfully created"
+                            .format(file_name))
+            return True, None
+        except errors.HttpError as e:
+            logger.log_error("Error creating file: {}".format(e))
             return False, str(e)
 
     def _get_folder_id(self, folder_name):

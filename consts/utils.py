@@ -7,4 +7,6 @@ class EmailUtils:
 
 
 class StorageUtils:
+    TEST_FILE_IMAGE = "./utils/files/test.jpg"
+    TEST_FILE_PDF = "./utils/files/test.pdf"
     TEST_FOLDER_NAME = "test"
