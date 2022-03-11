@@ -4,6 +4,7 @@ import os
 from googleapiclient import errors
 from googleapiclient.http import MediaFileUpload
 
+from consts.roles import Storage
 from helpers.service_helper import GoogleServiceHandler, get_auth
 from utils.logger import logger
 
@@ -30,6 +31,58 @@ class StorageHandler(GoogleServiceHandler):
 
         if not self.credentials:
             logger.log_error("Failed to initialize StorageHandler")
+
+    @get_auth
+    def share_folder(self, folder_name, email,
+                     parent_name=None,
+                     role=Storage.READ,
+                     notify=True):
+        """
+        Share folder with an email owner with a certain role.
+
+        Args:
+            - folder_name(str): Name of the folder to share.
+            - email(str): Email address to share the folder with.
+            - role(str): read/write role.
+            - notify(bool): Send notification by email or not.
+
+        Returns(tupple):
+            (True, None) or (False, err_msg)
+        """
+        logger.log_info("Sharing folder {} with {}. Role {}"
+                        .format(folder_name, email, role))
+        body = {
+            'role': role,
+            'emailAddress': email,
+            'type': 'user'
+        }
+
+        if parent_name:
+            r, parent_id = self._get_folder_id(parent_name)
+            if not r:
+                logger.log_error("Error sharing folder: {}".format(parent_id))
+                return False, parent_id
+        else:
+            parent_id = None
+
+        r, folder_id = self._get_folder_id(folder_name, parent_id=parent_id)
+        if not r:
+            logger.log_error("Error sharing folder: {}".format(parent_id))
+            return False, folder_id
+
+        try:
+            self.service.permissions().create(
+                body=body,
+                fileId=folder_id[0],
+                fields='id',
+                sendNotificationEmail=notify,
+                supportsAllDrives=True).execute()
+            logger.log_info("Successfully shared folder {}"
+                            .format(folder_name))
+            return True, None
+        except Exception as e:
+            logger.log_error("Error sharing folder: {}".format(e))
+            return False, str(e)
 
     @get_auth
     def create_folder(self, folder_name, parent_name=None):
@@ -126,7 +179,6 @@ class StorageHandler(GoogleServiceHandler):
 
         """
         query = "name='{}'".format(file_name) +\
-                " and mimeType='application/vnd.google-apps.file'" +\
                 " and trashed=false"
         if parent_id:
             query += " and {} in parents".format(parent_id)

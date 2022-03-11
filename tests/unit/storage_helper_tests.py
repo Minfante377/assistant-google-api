@@ -1,7 +1,7 @@
 import unittest
 
 from consts.auth import Auth
-from consts.utils import StorageUtils
+from consts.utils import EmailUtils, StorageUtils
 from helpers.storage_helper import StorageHandler
 from utils.logger import logger
 
@@ -56,3 +56,16 @@ class TestStorageHandler(unittest.TestCase):
         result, error =\
             self.handler.create_file(StorageUtils.TEST_FILE_PDF)
         assert result, "Failed to create new file: {}".format(error)
+
+    def test_share_folder(self):
+        """
+        Preconditions:
+            - StorageHandler object correctly instantiated.
+
+        Share a folder. Assert the result.
+
+        """
+        result, error = self.handler.share_folder(
+                StorageUtils.TEST_FOLDER_NAME,
+                EmailUtils.TEST_EMAIL)
+        assert result, "Failed to share folder: {}".format(error)
