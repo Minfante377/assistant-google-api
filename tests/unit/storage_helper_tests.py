@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from consts.auth import Auth
@@ -51,11 +52,11 @@ class TestStorageHandler(unittest.TestCase):
 
         result, error =\
             self.handler.create_file(StorageUtils.TEST_FILE_IMAGE)
-        assert result, "Failed to create new file: {}".format(error)
+        assert result, "Failed to create new image file: {}".format(error)
 
         result, error =\
             self.handler.create_file(StorageUtils.TEST_FILE_PDF)
-        assert result, "Failed to create new file: {}".format(error)
+        assert result, "Failed to create new pdf file: {}".format(error)
 
     def test_share_folder(self):
         """
@@ -70,3 +71,33 @@ class TestStorageHandler(unittest.TestCase):
                 StorageUtils.TEST_FOLDER_NAME,
                 EmailUtils.TEST_EMAIL)
         assert result, "Failed to share folder: {}".format(error)
+
+    def test_delete_folder(self):
+        """
+        Preconditions:
+            - StorageHandler object correctly instantiated.
+            - Folder "test" created.
+
+        Delete a folder. Assert the result.
+
+        """
+        result, error = self.handler.delete_folder(
+            StorageUtils.TEST_FOLDER_NAME)
+        assert result, "Failed to delete folder: {}".format(error)
+
+    def test_delete_file(self):
+        """
+        Preconditions:
+            - StorageHandler object correctly instantiated.
+            - Test files created.
+
+        Delete a folder. Assert the result.
+
+        """
+        result, error = self.handler.delete_file(
+            os.path.basename(StorageUtils.TEST_FILE_IMAGE))
+        assert result, "Failed to delete image file: {}".format(error)
+
+        result, error = self.handler.delete_file(
+            os.path.basename(StorageUtils.TEST_FILE_PDF))
+        assert result, "Failed to delete pdf file: {}".format(error)

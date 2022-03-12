@@ -174,6 +174,66 @@ class StorageHandler(GoogleServiceHandler):
             logger.log_error("Error creating file: {}".format(e))
             return False, str(e)
 
+    def delete_folder(self, folder_name, parent_name=None):
+        """
+        Delete a folder using google drive API.
+
+        Args:
+            - folder_name(str): The name of the folder to delete.
+            - parent_name(list): Parent folder name.
+
+        Returns(Tupple):
+            (True, None) or (False, err_msg)
+
+        """
+        logger.log_info("Deleting folder {}".format(folder_name))
+        if parent_name:
+            r, parent_name = self._get_folder_id(parent_name)
+            if not r:
+                return False, parent_name
+
+        r, folder_id = self._get_folder_id(folder_name, parent_id=parent_name)
+        if not r:
+            logger.log_error("Folder {} does not exist".format(folder_name))
+            return False, folder_id
+        try:
+            self.service.files().delete(fileId=folder_id[0]).execute()
+            logger.log_info("Folder {} deleted.".format(folder_name))
+            return True, None
+        except errors.HttpError as e:
+            logger.log_error("Error deleting folder: {}".format(e))
+            return False, str(e)
+
+    def delete_file(self, file_name, parent_name=None):
+        """
+        Delete a file using google drive API.
+
+        Args:
+            - file_name(str): The name of the file to delete.
+            - parent_name(list): Parent folder name.
+
+        Returns(Tupple):
+            (True, None) or (False, err_msg)
+
+        """
+        logger.log_info("Deleting file {}".format(file_name))
+        if parent_name:
+            r, parent_name = self._get_folder_id(parent_name)
+            if not r:
+                return False, parent_name
+
+        r, file_id = self._get_file_id(file_name, parent_id=parent_name)
+        if not r:
+            logger.log_error("File {} does not exist".format(file_name))
+            return False, file_id
+        try:
+            self.service.files().delete(fileId=file_id[0]).execute()
+            logger.log_info("Folder {} deleted.".format(file_name))
+            return True, None
+        except errors.HttpError as e:
+            logger.log_error("Error deleting file: {}".format(e))
+            return False, str(e)
+
     def _get_file_id(self, file_name, parent_id=None):
         """
         Query the file id of a folder by file name.
