@@ -70,12 +70,21 @@ class StorageHandler(GoogleServiceHandler):
             logger.log_error("Error sharing folder: {}".format(parent_id))
             return False, folder_id
 
+        if role == Storage.OWN:
+            transfer_ownership = True
+            move = True
+        else:
+            transfer_ownership = False
+            move = False
+
         try:
             self.service.permissions().create(
                 body=body,
                 fileId=folder_id[0],
                 fields='id',
                 sendNotificationEmail=notify,
+                transferOwnership=transfer_ownership,
+                moveToNewOwnersRoot=move,
                 supportsAllDrives=True).execute()
             logger.log_info("Successfully shared folder {}"
                             .format(folder_name))

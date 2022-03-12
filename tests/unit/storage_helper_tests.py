@@ -61,6 +61,7 @@ class TestStorageHandler(unittest.TestCase):
         """
         Preconditions:
             - StorageHandler object correctly instantiated.
+            - Folder "test" created.
 
         Share a folder. Assert the result.
 
