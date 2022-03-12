@@ -234,6 +234,40 @@ class StorageHandler(GoogleServiceHandler):
             logger.log_error("Error deleting file: {}".format(e))
             return False, str(e)
 
+    def exist(self, name, parent_name=None):
+        """
+        Check whether a test/file exists.
+
+        Args:
+            - name(str): Name of the file/folder to query.
+            - parent_name(list): Parent folder name.
+
+        Returns(tupple):
+            (res, err_msg)
+
+        """
+        logger.log_info("Checking file {} existance".format(name))
+        query = "name='{}' ".format(name)
+        if parent_name:
+            r, parent_id = self._get_folder_id(parent_name)
+            if not r:
+                return None, parent_id
+            query += "and {} in parents".format(parent_id)
+
+        fields = "nextPageToken, files(id)"
+
+        logger.log_info("Querying {}".format(query))
+        try:
+            r = self.service.files().list(q=query, fields=fields,
+                                          spaces='drive').execute()
+            items = r.get('files', [])
+            if items:
+                return True, None
+            return False, None
+        except Exception as e:
+            logger.log_error("Error querying file: {}".format(e))
+            return None, str(e)
+
     def _get_file_id(self, file_name, parent_id=None):
         """
         Query the file id of a folder by file name.

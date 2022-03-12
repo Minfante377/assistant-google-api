@@ -101,3 +101,15 @@ class TestStorageHandler(unittest.TestCase):
         result, error = self.handler.delete_file(
             os.path.basename(StorageUtils.TEST_FILE_PDF))
         assert result, "Failed to delete pdf file: {}".format(error)
+
+    def test_exist(self):
+        """
+        Preconditions:
+            - StorageHandler object correctly instantiated.
+
+        Check existance of a file. Assert the result.
+
+        """
+        result, error = self.handler.exist(
+                StorageUtils.TEST_FOLDER_NAME)
+        assert not error, "Error checking existance: {}".format(error)
