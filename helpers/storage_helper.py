@@ -174,6 +174,7 @@ class StorageHandler(GoogleServiceHandler):
             logger.log_error("Error creating file: {}".format(e))
             return False, str(e)
 
+    @get_auth
     def delete_folder(self, folder_name, parent_name=None):
         """
         Delete a folder using google drive API.
@@ -204,6 +205,7 @@ class StorageHandler(GoogleServiceHandler):
             logger.log_error("Error deleting folder: {}".format(e))
             return False, str(e)
 
+    @get_auth
     def delete_file(self, file_name, parent_name=None):
         """
         Delete a file using google drive API.
@@ -234,6 +236,7 @@ class StorageHandler(GoogleServiceHandler):
             logger.log_error("Error deleting file: {}".format(e))
             return False, str(e)
 
+    @get_auth
     def exist(self, name, parent_name=None):
         """
         Check whether a test/file exists.
