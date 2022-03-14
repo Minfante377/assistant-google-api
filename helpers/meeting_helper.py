@@ -90,3 +90,58 @@ class MeetingHandler(GoogleServiceHandler):
         except errors.HttpError as e:
             logger.log_error("Error creating event: {}".format(e))
             return False, str(e)
+
+    @get_auth
+    def delete_event(self, calendar_id, summary):
+        """
+        Delete event from a certain calendar using Google Calendar API.
+
+        Args:
+            - calendar_id(str): ID of the calendar which the event belongs to.
+            - summary(str): Summary of the event.
+
+        Returns(tupple):
+            (True, None) or (False, err_msg)
+
+        """
+        logger.log_info("Deleting event {} from calendar {}"
+                        .format(summary, calendar_id))
+        r, event_id = self._get_event_id_summary(calendar_id, summary)
+        if not r:
+            return False, event_id
+
+        try:
+            r = self.service.events().delete(calendarId=calendar_id,
+                                             sendUpdates='all',
+                                             eventId=event_id).execute()
+            logger.log_info("Event successfully deleted")
+            return True, None
+        except errors.HttpError as e:
+            logger.log_error("Failed to delete event: {}".format(e))
+            return False, str(e)
+
+    @get_auth
+    def _get_event_id_summary(self, calendar_id, summary):
+        """
+        Get event id of a certain calendar filtering by its summary.
+
+        Args:
+            - calendar_id(str): ID of the calendar which the event belongs to.
+            - summary(str): Summary of the event.
+
+        Returns(tupple):
+            (True, event_id) or (False, err_msg)
+
+        """
+        logger.log_info("Querying event ID of event {}".format(summary))
+        r = self.service.events().list(calendarId=calendar_id,
+                                       orderBy='updated').execute()
+
+        items = r.get('items', [])
+        for item in items:
+            if item.get('summary', '') == summary:
+                logger.log_info("Event found: {}".format(item))
+                logger.log_info("Successfully queried event")
+                return True, item['id']
+        logger.log_error("No event found with summary {}".format(summary))
+        return False, "No event found with summary {}".format(summary)

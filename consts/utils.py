@@ -8,8 +8,7 @@ class EmailUtils:
 
 class MeetingUtils:
     ONLINE_EVENT = 'online'
-    TEST_ATTENDEES = ['maleinf09@gmail.com',
-                      'archeteam.info@gmail.com']
+    TEST_ATTENDEES = ['maleinf09@gmail.com']
     TEST_CALENDAR_ID = 'primary'
     TEST_DELTA = '-03:00'
     TIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
