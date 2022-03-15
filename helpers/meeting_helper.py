@@ -121,6 +121,72 @@ class MeetingHandler(GoogleServiceHandler):
             return False, str(e)
 
     @get_auth
+    def create_calendar(self, summary, time_zone):
+        """
+        Create a calendar using Google Calendar API
+
+        Args:
+            - summary(str): Name of the calendar.
+            - time_zone(str): Time zone of the calendar.
+
+        Returns(tupple):
+            (True, None) or (False, err_msg)
+
+        """
+        logger.log_info("Creating calendar {}".format(summary))
+
+        body = {
+            'summary': summary,
+            'timeZone': time_zone
+        }
+
+        try:
+            self.service.calendars().insert(body=body).execute()
+            logger.log_info("Successfully created calendar")
+            return True, None
+        except errors.HttpError as e:
+            logger.log_error("Error creating calendar: {}".format(e))
+            return False, str(e)
+
+    @get_auth
+    def delete_calendar(self, summary):
+        """
+        Delete calendar by calendar name using Google Calendar API
+
+        Args:
+            - summary(str): Name of the calendar.
+
+        Returns(tupple):
+            (True, None) or (False, err_msg)
+
+        """
+        logger.log_info("Deleting calendar {}".format(summary))
+        r, calendar_id = self._get_calendar_id_summary(summary)
+        if not r:
+            logger.log_error("Failed to retrieve calendar ID")
+            return False, calendar_id
+
+        try:
+            self.service.calendars().delete(calendarId=calendar_id).execute()
+            logger.log_info("Successfully deleted calendar")
+            return True, None
+        except errors.HttpError as e:
+            logger.log_error("Failed to delete calendar: {}".format(e))
+            return False, str(e)
+
+    @get_auth
+    def get_calendar_id(self, summary):
+        """
+        Get ID of the calendar based on its summary
+
+        Args:
+            - summary(str): Name of the calendar.
+
+        Returns(True, calendar_id) or (False, err_msg)
+
+        """
+        return self._get_calendar_id_summary(summary)
+
     def _get_event_id_summary(self, calendar_id, summary):
         """
         Get event id of a certain calendar filtering by its summary.
@@ -145,3 +211,29 @@ class MeetingHandler(GoogleServiceHandler):
                 return True, item['id']
         logger.log_error("No event found with summary {}".format(summary))
         return False, "No event found with summary {}".format(summary)
+
+    def _get_calendar_id_summary(self, summary):
+        """
+        Get calendar id filtering by its summary.
+
+        Args:
+            - summary(str): Summary of the calendar.
+
+        Returns(tupple):
+            (True, calendar_id) or (False, err_msg)
+
+        """
+        logger.log_info("Querying calendar ID of {}".format(summary))
+        page_token = None
+        while True:
+            r = self.service.calendarList().list(
+                pageToken=page_token).execute()
+            items = r.get('items', [])
+            for item in items:
+                if item.get('summary', '') == summary:
+                    logger.log_info("Calendar found: {}".format(item))
+                    logger.log_info("Successfully queried event")
+                    return True, item['id']
+            page_token = r.get('nextPageToken')
+        logger.log_error("No calendar found with summary {}".format(summary))
+        return False, "No calendar found with summary {}".format(summary)

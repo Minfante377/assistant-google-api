@@ -69,3 +69,30 @@ class TestMeetingHandler(unittest.TestCase):
             MeetingUtils.TEST_SUMMARY)
 
         assert result, "Error deleting event: {}".format(error)
+
+    def test_create_calendar(self):
+        """
+        Preconditions:
+            - MeetingHandler object correctly instantiated.
+
+        Create a calendar. Assert the result
+        """
+        result, error = self.handler.create_calendar(
+            MeetingUtils.TEST_CALENDAR_ID,
+            MeetingUtils.TEST_TIMEZONE
+        )
+        assert result, "Error creating calendar: {}".format(error)
+
+    def test_delete_calendar(self):
+        """
+        Preconditions:
+            - MeetingHandler object correctly instantiated.
+            - Test calendar created.
+
+        Delete an calendar. Assert the result.
+
+        """
+        result, error = self.handler.delete_calendar(
+            MeetingUtils.TEST_CALENDAR_ID)
+
+        assert result, "Error deleting calendar: {}".format(error)
