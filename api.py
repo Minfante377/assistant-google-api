@@ -152,7 +152,7 @@ async def delete_calendar(calendar: Calendar):
     Request: POST
     Body: {'summary': str,
     }
-    Returns {'statusCode': , 'error': erro msg}
+    Returns {'statusCode': , 'error': error msg}
     """
     logger.log_info("New calendar deletion request received: {}"
                     .format(calendar))
@@ -166,4 +166,30 @@ async def delete_calendar(calendar: Calendar):
             'error': err})
     return json.dumps({
         'statusCode': 200,
+        'error': ''})
+
+
+@app.post("/meeting/get_calendar_id")
+async def get_calendar_id(calendar: Calendar):
+    """
+    Get calendar ID by syntax.
+
+    Request: POST
+    Body: {'summary': str,
+    }
+    Returns {'statusCode': , 'calendar_id': ,'error': error msg}
+    """
+    logger.log_info("Get Calendar ID request received: {}".format(calendar))
+    result, calendar_id = meeting_helper.MeetingHandler(Auth.CREDENTIALS_FILE)\
+        .get_calendar_id(calendar.summary)
+
+    if not result:
+        logger.log_error("Error deleting calendar")
+        return json.dumps({
+            'statusCode': 500,
+            'calendar_id': '',
+            'error': calendar_id})
+    return json.dumps({
+        'statusCode': 200,
+        'calendar_id': calendar_id,
         'error': ''})
