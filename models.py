@@ -20,13 +20,14 @@ class Event(BaseModel):
     calendar_id: Optional[str] = 'primary'
 
 
-class Item(BaseModel):
-    file_name: str
+class Folder(BaseModel):
+    folder_name: str
     parent_name: Optional[str] = ''
 
 
-class NewItem(Item):
-    content: str
+class Item(BaseModel):
+    file_name: str
+    parent_name: Optional[str] = ''
 
 
 class NewCalendar(Calendar):
@@ -39,3 +40,7 @@ class NewEvent(BaseModel):
     end: str
     timezone: str
     location: Optional[str] = 'online'
+
+
+class NewItem(Item):
+    content: str

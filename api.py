@@ -6,8 +6,8 @@ import tempfile
 from fastapi import FastAPI, HTTPException, status
 
 from helpers import email_helper, meeting_helper, storage_helper
-from models import Calendar, Email, Event, Item,  NewCalendar, NewEvent,\
-    NewItem
+from models import Calendar, Email, Event, Folder, Item,  NewCalendar,\
+    NewEvent, NewItem
 from consts.auth import Auth
 from utils.logger import logger
 
@@ -216,6 +216,48 @@ async def delete_item(item: Item):
         .delete_file(item.file_name, item.parent_name)
     if not result:
         logger.log_error("Error deleting file: {}".format(err))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=err)
+
+
+@app.post("/storage/create_folder")
+async def create_folder(folder: Folder):
+    """
+    Create Folder on Google Drive.
+
+    Request: POST
+    Body: {
+        'folder_name': str,
+        'parent_name': optinal[str]
+    }
+    """
+    logger.log_info("Create folder request received: {}".format(folder))
+    result, err = storage_helper.StorageHandler(Auth.CREDENTIALS_FILE)\
+        .create_folder(folder.folder_name, folder.parent_name)
+    if not result:
+        logger.log_error("Error creating folder: {}".format(err))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=err)
+
+
+@app.post("/storage/delete_folder")
+async def delete_folder(folder: Folder):
+    """
+    Delete Folder on Google Drive.
+
+    Request: POST
+    Body: {
+        'folder_name': str,
+        'parent_name': optinal[str]
+    }
+    """
+    logger.log_info("Delete folder request received: {}".format(folder))
+    result, err = storage_helper.StorageHandler(Auth.CREDENTIALS_FILE)\
+        .delete_folder(folder.folder_name, folder.parent_name)
+    if not result:
+        logger.log_error("Error deleting folder: {}".format(err))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=err)
