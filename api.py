@@ -6,7 +6,7 @@ from fastapi import FastAPI
 
 from helpers import email_helper, meeting_helper, service_helper,\
     storage_helper
-from models import Email, Event, NewEvent
+from models import Calendar, Email, Event, NewCalendar, NewEvent
 from consts.auth import Auth
 from utils.logger import logger
 
@@ -110,6 +110,57 @@ async def delete_event(event: Event):
 
     if not result:
         logger.log_error("Error deleting event")
+        return json.dumps({
+            'statusCode': 500,
+            'error': err})
+    return json.dumps({
+        'statusCode': 200,
+        'error': ''})
+
+
+@app.post("/meeting/create_calendar")
+async def create_calendar(calendar: NewCalendar):
+    """
+    Create Google Calendar calendar.
+
+    Request: POST
+    Body: {'summary': str,
+           'time_zone': str
+    }
+    Returns {'statusCode': , 'error': erro msg}
+    """
+    logger.log_info("New calendar creation request received: {}"
+                    .format(calendar))
+    result, err = meeting_helper.MeetingHandler(Auth.CREDENTIALS_FILE)\
+        .create_calendar(calendar.summary, calendar.time_zone)
+
+    if not result:
+        logger.log_error("Error creating calendar")
+        return json.dumps({
+            'statusCode': 500,
+            'error': err})
+    return json.dumps({
+        'statusCode': 200,
+        'error': ''})
+
+
+@app.post("/meeting/delete_calendar")
+async def delete_calendar(calendar: Calendar):
+    """
+    Delete Google Calendar calendar.
+
+    Request: POST
+    Body: {'summary': str,
+    }
+    Returns {'statusCode': , 'error': erro msg}
+    """
+    logger.log_info("New calendar deletion request received: {}"
+                    .format(calendar))
+    result, err = meeting_helper.MeetingHandler(Auth.CREDENTIALS_FILE)\
+        .delete_calendar(calendar.summary)
+
+    if not result:
+        logger.log_error("Error deleting calendar")
         return json.dumps({
             'statusCode': 500,
             'error': err})

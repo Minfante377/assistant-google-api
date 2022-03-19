@@ -2,6 +2,10 @@ from pydantic import BaseModel
 from typing import Optional
 
 
+class Calendar(BaseModel):
+    summary: str
+
+
 class Email(BaseModel):
     recipient: str
     sender: str
@@ -14,6 +18,10 @@ class Email(BaseModel):
 class Event(BaseModel):
     summary: str
     calendar_id: Optional[str] = 'primary'
+
+
+class NewCalendar(Calendar):
+    time_zone: str
 
 
 class NewEvent(BaseModel):
