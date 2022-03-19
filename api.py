@@ -2,7 +2,7 @@ import base64
 import json
 import tempfile
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status
 
 from helpers import email_helper, meeting_helper, service_helper,\
     storage_helper
@@ -26,7 +26,6 @@ async def send_email(email: Email):
            'attachement': optional[str],
            'extension': optional[str]
     }
-    Returns {'statusCode': , 'error': error msg}
     """
     logger.log_info("New email request received: {}".format(email))
 
@@ -40,9 +39,9 @@ async def send_email(email: Email):
                                     email.subject, f.name)
         if not result:
             logger.log_error("Error sending message")
-            return json.dumps({
-                'statusCode': 500,
-                'error': err})
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=err)
         return json.dumps({
             'statusCode': 200,
             'error': ''})
@@ -54,12 +53,9 @@ async def send_email(email: Email):
         email.subject)
     if not result:
         logger.log_error("Error sending message")
-        return json.dumps({
-            'statusCode': 500,
-            'error': err})
-    return json.dumps({
-        'statusCode': 200,
-        'error': ''})
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=err)
 
 
 @app.post("/meeting/create_event")
@@ -76,7 +72,6 @@ async def create_event(event: NewEvent):
            'calendar_id': optional[str],
            'location': optional[str]
     }
-    Returns {'statusCode': , 'error': error msg}
     """
     logger.log_info("New event creation request received: {}".format(event))
     result, err = meeting_helper.MeetingHandler(Auth.CREDENTIALS_FILE)\
@@ -85,12 +80,9 @@ async def create_event(event: NewEvent):
 
     if not result:
         logger.log_error("Error creating event")
-        return json.dumps({
-            'statusCode': 500,
-            'error': err})
-    return json.dumps({
-        'statusCode': 200,
-        'error': ''})
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=err)
 
 
 @app.post("/meeting/delete_event")
@@ -102,7 +94,6 @@ async def delete_event(event: Event):
     Body: {'summary': str ,
            'calendar_id': optional[str],
     }
-    Returns {'statusCode': , 'error': error msg}
     """
     logger.log_info("New event deletion request received: {}".format(event))
     result, err = meeting_helper.MeetingHandler(Auth.CREDENTIALS_FILE)\
@@ -110,12 +101,9 @@ async def delete_event(event: Event):
 
     if not result:
         logger.log_error("Error deleting event")
-        return json.dumps({
-            'statusCode': 500,
-            'error': err})
-    return json.dumps({
-        'statusCode': 200,
-        'error': ''})
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=err)
 
 
 @app.post("/meeting/create_calendar")
@@ -127,7 +115,6 @@ async def create_calendar(calendar: NewCalendar):
     Body: {'summary': str,
            'time_zone': str
     }
-    Returns {'statusCode': , 'error': erro msg}
     """
     logger.log_info("New calendar creation request received: {}"
                     .format(calendar))
@@ -136,12 +123,9 @@ async def create_calendar(calendar: NewCalendar):
 
     if not result:
         logger.log_error("Error creating calendar")
-        return json.dumps({
-            'statusCode': 500,
-            'error': err})
-    return json.dumps({
-        'statusCode': 200,
-        'error': ''})
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=err)
 
 
 @app.post("/meeting/delete_calendar")
@@ -152,7 +136,6 @@ async def delete_calendar(calendar: Calendar):
     Request: POST
     Body: {'summary': str,
     }
-    Returns {'statusCode': , 'error': error msg}
     """
     logger.log_info("New calendar deletion request received: {}"
                     .format(calendar))
@@ -161,12 +144,9 @@ async def delete_calendar(calendar: Calendar):
 
     if not result:
         logger.log_error("Error deleting calendar")
-        return json.dumps({
-            'statusCode': 500,
-            'error': err})
-    return json.dumps({
-        'statusCode': 200,
-        'error': ''})
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=err)
 
 
 @app.post("/meeting/get_calendar_id")
@@ -177,7 +157,7 @@ async def get_calendar_id(calendar: Calendar):
     Request: POST
     Body: {'summary': str,
     }
-    Returns {'statusCode': , 'calendar_id': ,'error': error msg}
+    Returns {'calendar_id':}
     """
     logger.log_info("Get Calendar ID request received: {}".format(calendar))
     result, calendar_id = meeting_helper.MeetingHandler(Auth.CREDENTIALS_FILE)\
@@ -185,11 +165,8 @@ async def get_calendar_id(calendar: Calendar):
 
     if not result:
         logger.log_error("Error fetching calendar ID")
-        return json.dumps({
-            'statusCode': 500,
-            'calendar_id': '',
-            'error': calendar_id})
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=calendar_id)
     return json.dumps({
-        'statusCode': 200,
-        'calendar_id': calendar_id,
-        'error': ''})
+        'calendar_id': calendar_id})
