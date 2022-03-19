@@ -7,7 +7,7 @@ from fastapi import FastAPI, HTTPException, status
 
 from helpers import email_helper, meeting_helper, storage_helper
 from models import Calendar, Email, Event, Folder, Item,  NewCalendar,\
-    NewEvent, NewItem
+    NewEvent, NewItem, SharedFolder
 from consts.auth import Auth
 from utils.logger import logger
 
@@ -311,3 +311,28 @@ async def exists_folder(folder: Folder):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=err)
     return json.dumps({'result': result})
+
+
+@app.post("/storage/share_folder")
+async def share_folder(folder: SharedFolder):
+    """
+    Share a folder with other user.
+
+    Request: POST
+    Body: {
+        'folder_name': str,
+        'parent_name': optional[str],
+        'email': str,
+        'role': optional[str],
+        'notify' bool
+    }
+    """
+    logger.log_info("Share folder request received: {}".format(folder))
+    result, err = storage_helper.StorageHandler(Auth.CREDENTIALS_FILE)\
+        .share_folder(folder.folder_name, folder.email, folder.parent_name,
+                      folder.role, folder.notify)
+    if err:
+        logger.log_error("Error sharing folder: {}".format(err))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=err)

@@ -44,3 +44,9 @@ class NewEvent(BaseModel):
 
 class NewItem(Item):
     content: str
+
+
+class SharedFolder(Folder):
+    email: str
+    role: Optional[str] = 'reader'
+    notify: Optional[bool] = True
