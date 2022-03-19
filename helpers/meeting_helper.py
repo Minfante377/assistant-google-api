@@ -1,3 +1,5 @@
+import time
+
 from googleapiclient import errors
 
 from consts.utils import MeetingUtils
@@ -212,12 +214,13 @@ class MeetingHandler(GoogleServiceHandler):
         logger.log_error("No event found with summary {}".format(summary))
         return False, "No event found with summary {}".format(summary)
 
-    def _get_calendar_id_summary(self, summary):
+    def _get_calendar_id_summary(self, summary, timeout=10):
         """
         Get calendar id filtering by its summary.
 
         Args:
             - summary(str): Summary of the calendar.
+            - timeout(int): Operation timeout
 
         Returns(tupple):
             (True, calendar_id) or (False, err_msg)
@@ -225,7 +228,8 @@ class MeetingHandler(GoogleServiceHandler):
         """
         logger.log_info("Querying calendar ID of {}".format(summary))
         page_token = None
-        while True:
+        now = time.time()
+        while time.time() - now < timeout:
             r = self.service.calendarList().list(
                 pageToken=page_token).execute()
             items = r.get('items', [])

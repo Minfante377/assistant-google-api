@@ -184,7 +184,7 @@ async def get_calendar_id(calendar: Calendar):
         .get_calendar_id(calendar.summary)
 
     if not result:
-        logger.log_error("Error deleting calendar")
+        logger.log_error("Error fetching calendar ID")
         return json.dumps({
             'statusCode': 500,
             'calendar_id': '',
