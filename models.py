@@ -20,6 +20,15 @@ class Event(BaseModel):
     calendar_id: Optional[str] = 'primary'
 
 
+class Item(BaseModel):
+    file_name: str
+    parent_name: Optional[str] = ''
+
+
+class NewItem(Item):
+    content: str
+
+
 class NewCalendar(Calendar):
     time_zone: str
 

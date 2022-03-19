@@ -1,12 +1,13 @@
 import base64
 import json
+import os
 import tempfile
 
 from fastapi import FastAPI, HTTPException, status
 
-from helpers import email_helper, meeting_helper, service_helper,\
-    storage_helper
-from models import Calendar, Email, Event, NewCalendar, NewEvent
+from helpers import email_helper, meeting_helper, storage_helper
+from models import Calendar, Email, Event, Item,  NewCalendar, NewEvent,\
+    NewItem
 from consts.auth import Auth
 from utils.logger import logger
 
@@ -170,3 +171,51 @@ async def get_calendar_id(calendar: Calendar):
             detail=calendar_id)
     return json.dumps({
         'calendar_id': calendar_id})
+
+
+@app.post("/storage/create_item")
+async def create_item(item: NewItem):
+    """
+    Create Item on Google Drive.
+
+    Request: POST
+    Body: {
+        'file_name': str,
+        'content' bytes,
+        'parent_name': optinal[str]
+    }
+    """
+    logger.log_info("Create file request received: {}".format(item))
+    suffix = ".{}".format(item.file_name.split('.', 1)[-1])
+    f = tempfile.NamedTemporaryFile(suffix=suffix)
+    data = base64.b64decode(item.content)
+    f.write(data)
+    os.link(f.name, item.file_name)
+    result, err = storage_helper.StorageHandler(Auth.CREDENTIALS_FILE)\
+        .create_file(item.file_name, item.parent_name)
+    os.remove(item.file_name)
+    if not result:
+        logger.log_error("Error creating file: {}".format(err))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=err)
+
+
+@app.post("/storage/delete_item")
+async def delete_item(item: Item):
+    """
+    Delete Item on Google Drive using its name.
+
+    Request: POST
+    Body: {
+        'file_name': str,
+        'parent_name': optional[str]
+    """
+    logger.log_info("Delete file request received: {}".format(item))
+    result, err = storage_helper.StorageHandler(Auth.CREDENTIALS_FILE)\
+        .delete_file(item.file_name, item.parent_name)
+    if not result:
+        logger.log_error("Error deleting file: {}".format(err))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=err)
