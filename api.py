@@ -261,3 +261,53 @@ async def delete_folder(folder: Folder):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=err)
+
+
+@app.post("/storage/item/exists")
+async def exists_item(item: Item):
+    """
+    Check whether an item exists.
+
+    Request: POST
+    Body: {
+        'item_name': str,
+        'parent_name': optinal[str]
+    }
+
+    Returns {'result': 'True/False'}
+    """
+    logger.log_info("Check item existance request received: {}"
+                    .format(item))
+    result, err = storage_helper.StorageHandler(Auth.CREDENTIALS_FILE)\
+        .exist(item.file_name, item.parent_name)
+    if err:
+        logger.log_error("Error fetching item: {}".format(err))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=err)
+    return json.dumps({'result': result})
+
+
+@app.post("/storage/folder/exists")
+async def exists_folder(folder: Folder):
+    """
+    Check whether an folder exists.
+
+    Request: POST
+    Body: {
+        'folder_name': str,
+        'parent_name': optinal[str]
+    }
+
+    Returns {'result': 'True/False'}
+    """
+    logger.log_info("Check folder existance request received: {}"
+                    .format(folder))
+    result, err = storage_helper.StorageHandler(Auth.CREDENTIALS_FILE)\
+        .exist(folder.folder_name, folder.parent_name)
+    if err:
+        logger.log_error("Error fetching folder: {}".format(err))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=err)
+    return json.dumps({'result': result})
